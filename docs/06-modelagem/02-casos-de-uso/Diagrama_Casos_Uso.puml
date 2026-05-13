@@ -1,0 +1,140 @@
+@startuml Diagrama_Casos_Uso_Clinica_Psicologia
+' Diagrama de Casos de Uso — Sistema de Gestão para Clínica de Psicologia
+' Autor: Pedro Lourençoni Lima
+' Referência: Larman — Utilizando UML e Padrões, capítulo 6
+' Para gerar PNG: java -jar plantuml.jar Diagrama_Casos_Uso.puml
+'                 ou online: https://www.plantuml.com/plantuml/uml/
+
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #F8FAFC
+  BorderColor #2563EB
+  ArrowColor #475569
+}
+
+' =================== Atores ===================
+actor "Administrador\nda Clínica" as Admin
+actor "Profissional\n(Psicólogo)" as Prof
+actor "Secretária" as Sec
+actor "Paciente" as Pac
+
+actor "Sistema de\nWhatsApp/E-mail" as Mensageria <<external>>
+actor "Sistema de\nGeração de PDF" as PDF <<external>>
+actor "Provedor de\nPagamento" as Pgto <<external>>
+actor "Sistema de\nAuditoria" as Audit <<system>>
+
+' =================== Sistema ===================
+rectangle "Sistema de Gestão para Clínica de Psicologia" {
+
+  package "Identidade e Acesso" {
+    usecase "UC_Autenticar" as UCAuth
+    usecase "UC_Recuperar\nSenha" as UCSenha
+    usecase "UC_Controle\nde Acesso (RBAC)" as UCRBAC
+  }
+
+  package "Cadastros" {
+    usecase "UC_Cadastrar\nProfissional" as UCCP
+    usecase "UC_Cadastrar\nPaciente" as UCCPac
+    usecase "UC_Manter\nEspecialidades" as UCEsp
+    usecase "UC_Consentimento\nLGPD" as UCLGPD
+  }
+
+  package "Agendamento" {
+    usecase "**UC01**\nAgendar Consulta" as UC01 #LightBlue
+    usecase "UC_Cancelar\nRemarcar" as UCCanc
+  }
+
+  package "Atendimento e Prontuário" {
+    usecase "**UC02**\nManter\nProntuário" as UC02 #LightBlue
+    usecase "**UC03**\nRegistrar Atendi-\nmento e Recibo" as UC03 #LightBlue
+    usecase "UC_Anexar\nArquivo" as UCAnx
+    usecase "UC_Exportar\nProntuário (LGPD)" as UCExp
+  }
+
+  package "Comunicação" {
+    usecase "**UC04**\nEnviar Lembrete" as UC04 #LightBlue
+    usecase "UC_Manter\nTemplates" as UCTpl
+    usecase "UC_Lembrete\nde Pagamento" as UCLPgto
+  }
+
+  package "Financeiro e Relatórios" {
+    usecase "UC_Dashboard\nFinanceiro" as UCDash
+    usecase "**UC05**\nGerar Relatório" as UC05 #LightBlue
+  }
+
+  package "Portal do Paciente" {
+    usecase "UC_Portal\nPaciente" as UCPortal
+    usecase "UC_Portabilidade\nLGPD" as UCPort
+    usecase "UC_Solicitar\nAnonimização" as UCAnon
+  }
+
+  package "Auditoria" {
+    usecase "UC_Consultar\nAuditoria" as UCAud
+  }
+}
+
+' =================== Relacionamentos: atores ↔ UCs ===================
+
+' Admin
+Admin --> UCAuth
+Admin --> UCCP
+Admin --> UCEsp
+Admin --> UCRBAC
+Admin --> UCDash
+Admin --> UC05
+Admin --> UCAud
+
+' Profissional
+Prof --> UCAuth
+Prof --> UC02
+Prof --> UC03
+Prof --> UCAnx
+Prof --> UCExp
+Prof --> UC05
+Prof --> UC01
+
+' Secretária
+Sec --> UCAuth
+Sec --> UCCPac
+Sec --> UC01
+Sec --> UCCanc
+Sec --> UC03
+Sec --> UCTpl
+Sec --> UCLPgto
+
+' Paciente
+Pac --> UCAuth
+Pac --> UCPortal
+Pac --> UC01 : <<autoatendimento>>
+Pac --> UCCanc : <<próprio>>
+Pac --> UCLGPD
+Pac --> UCPort
+Pac --> UCAnon
+
+' Sistemas externos
+UC04 --> Mensageria
+UCLPgto --> Mensageria
+UC03 --> PDF
+UCExp --> PDF
+UC03 --> Pgto
+
+' Auditoria (system actor) — registra eventos transversais
+UC01 ..> Audit : <<include>>
+UC02 ..> Audit : <<include>>
+UC03 ..> Audit : <<include>>
+UCExp ..> Audit : <<include>>
+UCRBAC ..> Audit : <<include>>
+
+' =================== Relacionamentos entre UCs ===================
+UC01 ..> UCLGPD : <<include>>\n(consentimento\nvigente)
+UC01 ..> UC04 : <<include>>\n(programa\nlembrete)
+UC03 ..> UC02 : <<extend>>\n(registra evolução)
+UCCanc ..> UC04 : <<include>>\n(cancela\nlembrete pendente)
+UCExp ..> UCLGPD : <<include>>\n(consentimento\nadicional)
+
+' Generalização (Profissional é também usuário do sistema)
+' não modelada visualmente para evitar poluição
+
+@enduml
