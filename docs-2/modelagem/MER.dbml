@@ -1,0 +1,248 @@
+// Modelo Entidade-Relacionamento — Sistema de Gestão para Clínica de Psicologia
+// Autor: João Pedro Gonçalves Ferreira
+// Notação: DBML (compatível com dbdiagram.io)
+// Para visualizar: https://dbdiagram.io/d → New Diagram → Import → DBML → cole este conteúdo
+
+Project clinica_psicologia {
+  database_type: 'PostgreSQL'
+  Note: 'Sistema de Gestão para Clínica de Psicologia — Entrega 2 (modelagem de análise)'
+}
+
+// ============================================================
+// 1. Identidade e controle de acesso
+// ============================================================
+
+Table Usuario {
+  id            uuid          [pk]
+  email         varchar(255)  [unique, not null]
+  senha_hash    varchar(255)  [not null, note: 'argon2id, custo >= 12']
+  nome          varchar(150)  [not null]
+  ativo         boolean       [not null, default: true]
+  mfa_habilitado boolean      [not null, default: false]
+  criado_em     timestamp     [not null]
+  atualizado_em timestamp     [not null]
+}
+
+Table Papel {
+  id    int           [pk, increment]
+  nome  varchar(50)   [unique, not null, note: 'ADMIN | PROFISSIONAL | SECRETARIA | PACIENTE']
+}
+
+Table UsuarioPapel {
+  usuario_id uuid [ref: > Usuario.id]
+  papel_id   int  [ref: > Papel.id]
+  indexes {
+    (usuario_id, papel_id) [pk]
+  }
+}
+
+// ============================================================
+// 2. Domínio clínico
+// ============================================================
+
+Table Clinica {
+  id            uuid          [pk]
+  razao_social  varchar(200)  [not null]
+  cnpj          varchar(14)   [unique]
+  endereco      varchar(255)
+  telefone      varchar(20)
+  criado_em     timestamp     [not null]
+}
+
+Table Profissional {
+  id              uuid         [pk]
+  usuario_id      uuid         [ref: - Usuario.id, unique, not null]
+  clinica_id      uuid         [ref: > Clinica.id]
+  crp             varchar(20)  [unique, not null]
+  bio             text
+  ativo           boolean      [not null, default: true]
+  permite_autoagendamento boolean [not null, default: false]
+}
+
+Table Especialidade {
+  id    int          [pk, increment]
+  nome  varchar(100) [unique, not null]
+}
+
+Table ProfissionalEspecialidade {
+  profissional_id  uuid [ref: > Profissional.id]
+  especialidade_id int  [ref: > Especialidade.id]
+  indexes {
+    (profissional_id, especialidade_id) [pk]
+  }
+}
+
+Table AgendaConfig {
+  id              uuid     [pk]
+  profissional_id uuid     [ref: > Profissional.id, not null]
+  dia_semana      int      [not null, note: '0=Dom..6=Sab']
+  hora_inicio     time     [not null]
+  hora_fim        time     [not null]
+  duracao_slot_min int     [not null, default: 50]
+}
+
+Table Paciente {
+  id                       uuid         [pk]
+  usuario_id               uuid         [ref: - Usuario.id, note: 'opcional — paciente sem login só recebe lembrete']
+  nome                     varchar(150) [not null]
+  cpf                      varchar(11)  [unique]
+  data_nascimento          date
+  email                    varchar(255)
+  telefone                 varchar(20)
+  canal_preferido_lembrete varchar(20)  [note: 'WHATSAPP | EMAIL | AMBOS']
+  observacoes              text
+  ativo                    boolean      [not null, default: true]
+  criado_em                timestamp    [not null]
+}
+
+Table VinculoProfissionalPaciente {
+  profissional_id uuid       [ref: > Profissional.id]
+  paciente_id     uuid       [ref: > Paciente.id]
+  inicio          date       [not null]
+  fim             date
+  indexes {
+    (profissional_id, paciente_id) [pk]
+  }
+}
+
+// ============================================================
+// 3. Agendamento e atendimento
+// ============================================================
+
+Table Agendamento {
+  id              uuid         [pk]
+  profissional_id uuid         [ref: > Profissional.id, not null]
+  paciente_id     uuid         [ref: > Paciente.id, not null]
+  inicio          timestamp    [not null]
+  fim             timestamp    [not null]
+  modalidade      varchar(20)  [not null, note: 'PRESENCIAL | ONLINE']
+  tipo_sessao     varchar(30)  [not null, note: 'ANAMNESE | RETORNO | AVALIACAO | GRUPAL']
+  status          varchar(20)  [not null, note: 'AGENDADO | CONFIRMADO | REALIZADO | CANCELADO | FALTOU']
+  observacoes     text
+  criado_por      uuid         [ref: > Usuario.id]
+  criado_em       timestamp    [not null]
+  atualizado_em   timestamp    [not null]
+  indexes {
+    (profissional_id, inicio)
+    (paciente_id, inicio)
+  }
+}
+
+Table Atendimento {
+  id              uuid       [pk]
+  agendamento_id  uuid       [ref: - Agendamento.id, unique, not null]
+  iniciado_em     timestamp
+  finalizado_em   timestamp
+  duracao_min     int
+  presenca        boolean    [not null]
+  observacoes     text
+}
+
+// ============================================================
+// 4. Prontuário
+// ============================================================
+
+Table Prontuario {
+  id              uuid       [pk]
+  paciente_id     uuid       [ref: - Paciente.id, unique, not null]
+  aberto_em       timestamp  [not null]
+  encerrado_em    timestamp
+}
+
+Table EvolucaoSessao {
+  id                       uuid         [pk]
+  prontuario_id            uuid         [ref: > Prontuario.id, not null]
+  atendimento_id           uuid         [ref: > Atendimento.id]
+  profissional_id          uuid         [ref: > Profissional.id, not null]
+  tipo                     varchar(30)  [not null, note: 'SESSAO_REGULAR | RETORNO | AVALIACAO | ALTA | ENCAMINHAMENTO | CORRECAO']
+  texto_cifrado            text         [not null, note: 'AES-256 em repouso']
+  evolucao_corrigida_id    uuid         [ref: > EvolucaoSessao.id, note: 'preenchido se tipo=CORRECAO']
+  registrado_em            timestamp    [not null]
+  hash_integridade         varchar(64)  [note: 'SHA-256 do texto']
+}
+
+Table Anexo {
+  id              uuid         [pk]
+  evolucao_id     uuid         [ref: > EvolucaoSessao.id, not null]
+  nome_arquivo    varchar(255) [not null]
+  mime_type       varchar(100) [not null]
+  tamanho_bytes   bigint       [not null]
+  storage_uri     varchar(500) [not null, note: 'caminho cifrado no object storage']
+  carregado_em    timestamp    [not null]
+}
+
+// ============================================================
+// 5. Comunicação
+// ============================================================
+
+Table Lembrete {
+  id              uuid         [pk]
+  agendamento_id  uuid         [ref: > Agendamento.id, not null]
+  canal           varchar(20)  [not null, note: 'WHATSAPP | EMAIL']
+  agendar_para    timestamp    [not null]
+  status          varchar(20)  [not null, note: 'PENDENTE | ENVIADO | CONFIRMADO | FALHADO | REENVIO']
+  tentativas      int          [not null, default: 0]
+  enviado_em      timestamp
+  resposta        text
+}
+
+Table TemplateMensagem {
+  id          uuid         [pk]
+  clinica_id  uuid         [ref: > Clinica.id, not null]
+  tipo        varchar(30)  [not null, note: 'LEMBRETE_24H | LEMBRETE_2H | COBRANCA | CONFIRMACAO']
+  canal       varchar(20)  [not null]
+  conteudo    text         [not null]
+}
+
+// ============================================================
+// 6. Financeiro
+// ============================================================
+
+Table Pagamento {
+  id              uuid          [pk]
+  atendimento_id  uuid          [ref: - Atendimento.id, unique]
+  paciente_id     uuid          [ref: > Paciente.id, not null]
+  valor           decimal(10,2) [not null]
+  forma           varchar(20)   [not null, note: 'DINHEIRO | PIX | CARTAO | PLANO']
+  status          varchar(20)   [not null, note: 'PENDENTE | PAGO | CANCELADO | INADIMPLENTE']
+  vencimento      date
+  pago_em         timestamp
+}
+
+Table Recibo {
+  id            uuid         [pk]
+  pagamento_id  uuid         [ref: - Pagamento.id, unique, not null]
+  numero        varchar(30)  [unique, not null]
+  emitido_em    timestamp    [not null]
+  pdf_uri       varchar(500)
+}
+
+// ============================================================
+// 7. LGPD e auditoria
+// ============================================================
+
+Table ConsentimentoLGPD {
+  id              uuid         [pk]
+  paciente_id     uuid         [ref: > Paciente.id, not null]
+  versao_termo    varchar(20)  [not null]
+  aceito_em       timestamp    [not null]
+  revogado_em     timestamp
+  ip_origem       varchar(45)
+}
+
+Table LogAuditoria {
+  id              uuid         [pk]
+  usuario_id      uuid         [ref: > Usuario.id]
+  acao            varchar(50)  [not null, note: 'CREATE | UPDATE | DELETE | READ | EXPORT | LOGIN | LOGIN_FAIL']
+  entidade        varchar(50)  [not null]
+  entidade_id     uuid
+  ip_origem       varchar(45)
+  payload_antes   json
+  payload_depois  json
+  registrado_em   timestamp    [not null]
+  severidade      varchar(10)  [note: 'INFO | WARN | ALTA']
+  indexes {
+    (entidade, entidade_id)
+    (usuario_id, registrado_em)
+  }
+}

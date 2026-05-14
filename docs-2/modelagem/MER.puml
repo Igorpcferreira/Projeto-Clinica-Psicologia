@@ -1,0 +1,234 @@
+@startuml MER_Clinica_Psicologia
+' Modelo Entidade-Relacionamento — Sistema de Gestão para Clínica de Psicologia
+' Autor: João Pedro Gonçalves Ferreira
+' Para gerar PNG: java -jar plantuml.jar MER.puml
+' Online: http://www.plantuml.com/plantuml/uml/
+
+!define Table(name,desc) entity name as "name\n<size:11><i>desc</i></size>"
+!define PK <b>
+!define FK <i>
+
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+left to right direction
+
+' ============== Identidade e acesso ==============
+entity Usuario {
+  * <b>id</b> : uuid
+  --
+  * email : varchar
+  * senha_hash : varchar
+  * nome : varchar
+  * ativo : boolean
+  mfa_habilitado : boolean
+}
+
+entity Papel {
+  * <b>id</b> : int
+  --
+  * nome : varchar [ADMIN|PROFISSIONAL|SECRETARIA|PACIENTE]
+}
+
+entity UsuarioPapel {
+  * <b>usuario_id</b> : uuid <<FK>>
+  * <b>papel_id</b> : int <<FK>>
+}
+
+' ============== Domínio clínico ==============
+entity Clinica {
+  * <b>id</b> : uuid
+  --
+  * razao_social : varchar
+  cnpj : varchar
+}
+
+entity Profissional {
+  * <b>id</b> : uuid
+  --
+  * usuario_id : uuid <<FK>>
+  clinica_id : uuid <<FK>>
+  * crp : varchar
+  permite_autoagendamento : boolean
+}
+
+entity Especialidade {
+  * <b>id</b> : int
+  --
+  * nome : varchar
+}
+
+entity ProfissionalEspecialidade {
+  * <b>profissional_id</b> : uuid <<FK>>
+  * <b>especialidade_id</b> : int <<FK>>
+}
+
+entity AgendaConfig {
+  * <b>id</b> : uuid
+  --
+  * profissional_id : uuid <<FK>>
+  * dia_semana : int
+  * hora_inicio : time
+  * hora_fim : time
+  * duracao_slot_min : int
+}
+
+entity Paciente {
+  * <b>id</b> : uuid
+  --
+  usuario_id : uuid <<FK>>
+  * nome : varchar
+  cpf : varchar
+  email : varchar
+  telefone : varchar
+  canal_preferido_lembrete : varchar
+}
+
+entity VinculoProfissionalPaciente {
+  * <b>profissional_id</b> : uuid <<FK>>
+  * <b>paciente_id</b> : uuid <<FK>>
+  * inicio : date
+  fim : date
+}
+
+' ============== Agendamento e atendimento ==============
+entity Agendamento {
+  * <b>id</b> : uuid
+  --
+  * profissional_id : uuid <<FK>>
+  * paciente_id : uuid <<FK>>
+  * inicio : timestamp
+  * fim : timestamp
+  * modalidade : varchar
+  * tipo_sessao : varchar
+  * status : varchar
+}
+
+entity Atendimento {
+  * <b>id</b> : uuid
+  --
+  * agendamento_id : uuid <<FK>> [unique]
+  iniciado_em : timestamp
+  finalizado_em : timestamp
+  duracao_min : int
+  * presenca : boolean
+}
+
+' ============== Prontuário ==============
+entity Prontuario {
+  * <b>id</b> : uuid
+  --
+  * paciente_id : uuid <<FK>> [unique]
+  * aberto_em : timestamp
+  encerrado_em : timestamp
+}
+
+entity EvolucaoSessao {
+  * <b>id</b> : uuid
+  --
+  * prontuario_id : uuid <<FK>>
+  atendimento_id : uuid <<FK>>
+  * profissional_id : uuid <<FK>>
+  * tipo : varchar
+  * texto_cifrado : text
+  evolucao_corrigida_id : uuid <<FK>>
+  * registrado_em : timestamp
+}
+
+entity Anexo {
+  * <b>id</b> : uuid
+  --
+  * evolucao_id : uuid <<FK>>
+  * nome_arquivo : varchar
+  * mime_type : varchar
+  * tamanho_bytes : bigint
+  * storage_uri : varchar
+}
+
+' ============== Comunicação ==============
+entity Lembrete {
+  * <b>id</b> : uuid
+  --
+  * agendamento_id : uuid <<FK>>
+  * canal : varchar
+  * agendar_para : timestamp
+  * status : varchar
+  tentativas : int
+}
+
+entity TemplateMensagem {
+  * <b>id</b> : uuid
+  --
+  * clinica_id : uuid <<FK>>
+  * tipo : varchar
+  * canal : varchar
+  * conteudo : text
+}
+
+' ============== Financeiro ==============
+entity Pagamento {
+  * <b>id</b> : uuid
+  --
+  atendimento_id : uuid <<FK>> [unique]
+  * paciente_id : uuid <<FK>>
+  * valor : decimal
+  * forma : varchar
+  * status : varchar
+}
+
+entity Recibo {
+  * <b>id</b> : uuid
+  --
+  * pagamento_id : uuid <<FK>> [unique]
+  * numero : varchar
+  * emitido_em : timestamp
+}
+
+' ============== LGPD e auditoria ==============
+entity ConsentimentoLGPD {
+  * <b>id</b> : uuid
+  --
+  * paciente_id : uuid <<FK>>
+  * versao_termo : varchar
+  * aceito_em : timestamp
+  revogado_em : timestamp
+}
+
+entity LogAuditoria {
+  * <b>id</b> : uuid
+  --
+  usuario_id : uuid <<FK>>
+  * acao : varchar
+  * entidade : varchar
+  entidade_id : uuid
+  * registrado_em : timestamp
+}
+
+' ============== Relacionamentos ==============
+Usuario ||--o{ UsuarioPapel
+Papel ||--o{ UsuarioPapel
+Usuario ||--o| Profissional
+Usuario ||--o| Paciente
+Clinica ||--o{ Profissional
+Profissional ||--o{ ProfissionalEspecialidade
+Especialidade ||--o{ ProfissionalEspecialidade
+Profissional ||--o{ AgendaConfig
+Profissional ||--o{ VinculoProfissionalPaciente
+Paciente ||--o{ VinculoProfissionalPaciente
+Profissional ||--o{ Agendamento
+Paciente ||--o{ Agendamento
+Agendamento ||--o| Atendimento
+Paciente ||--|| Prontuario
+Prontuario ||--o{ EvolucaoSessao
+Atendimento ||--o| EvolucaoSessao
+Profissional ||--o{ EvolucaoSessao
+EvolucaoSessao ||--o{ Anexo
+EvolucaoSessao ||--o{ EvolucaoSessao : corrige
+Agendamento ||--o{ Lembrete
+Clinica ||--o{ TemplateMensagem
+Atendimento ||--o| Pagamento
+Paciente ||--o{ Pagamento
+Pagamento ||--|| Recibo
+Paciente ||--o{ ConsentimentoLGPD
+Usuario ||--o{ LogAuditoria
+
+@enduml
