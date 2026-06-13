@@ -22,8 +22,8 @@ actor "Paciente" as Pac
 
 actor "Sistema de\nWhatsApp/E-mail" as Mensageria <<external>>
 actor "Sistema de\nGeração de PDF" as PDF <<external>>
-actor "Provedor de\nPagamento" as Pgto <<external>>
 actor "Sistema de\nAuditoria" as Audit <<system>>
+' Nota: "Provedor de Pagamento" sai do escopo desta entrega (módulo financeiro = evolução futura).
 
 ' =================== Sistema ===================
 rectangle "Sistema de Gestão para Clínica de Psicologia" {
@@ -47,8 +47,9 @@ rectangle "Sistema de Gestão para Clínica de Psicologia" {
   }
 
   package "Atendimento e Prontuário" {
+    usecase "**UC_Anamnese**\nRealizar Anamnese" as UCAna #LightBlue
     usecase "**UC02**\nManter\nProntuário" as UC02 #LightBlue
-    usecase "**UC03**\nRegistrar Atendi-\nmento e Recibo" as UC03 #LightBlue
+    usecase "**UC03**\nRegistrar\nAtendimento" as UC03 #LightBlue
     usecase "UC_Anexar\nArquivo" as UCAnx
     usecase "UC_Exportar\nProntuário (LGPD)" as UCExp
   }
@@ -56,12 +57,10 @@ rectangle "Sistema de Gestão para Clínica de Psicologia" {
   package "Comunicação" {
     usecase "**UC04**\nEnviar Lembrete" as UC04 #LightBlue
     usecase "UC_Manter\nTemplates" as UCTpl
-    usecase "UC_Lembrete\nde Pagamento" as UCLPgto
   }
 
-  package "Financeiro e Relatórios" {
-    usecase "UC_Dashboard\nFinanceiro" as UCDash
-    usecase "**UC05**\nGerar Relatório" as UC05 #LightBlue
+  package "Relatórios" {
+    usecase "**UC05**\nGerar Relatório\nOperacional" as UC05 #LightBlue
   }
 
   package "Portal do Paciente" {
@@ -82,12 +81,12 @@ Admin --> UCAuth
 Admin --> UCCP
 Admin --> UCEsp
 Admin --> UCRBAC
-Admin --> UCDash
 Admin --> UC05
 Admin --> UCAud
 
 ' Profissional
 Prof --> UCAuth
+Prof --> UCAna
 Prof --> UC02
 Prof --> UC03
 Prof --> UCAnx
@@ -102,7 +101,6 @@ Sec --> UC01
 Sec --> UCCanc
 Sec --> UC03
 Sec --> UCTpl
-Sec --> UCLPgto
 
 ' Paciente
 Pac --> UCAuth
@@ -115,13 +113,11 @@ Pac --> UCAnon
 
 ' Sistemas externos
 UC04 --> Mensageria
-UCLPgto --> Mensageria
-UC03 --> PDF
 UCExp --> PDF
-UC03 --> Pgto
 
 ' Auditoria (system actor) — registra eventos transversais
 UC01 ..> Audit : <<include>>
+UCAna ..> Audit : <<include>>
 UC02 ..> Audit : <<include>>
 UC03 ..> Audit : <<include>>
 UCExp ..> Audit : <<include>>

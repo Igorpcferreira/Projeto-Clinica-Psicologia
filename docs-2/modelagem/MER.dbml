@@ -1,11 +1,20 @@
-// Modelo Entidade-Relacionamento — Sistema de Gestão para Clínica de Psicologia
+// Modelo RELACIONAL (lógico) — Sistema de Gestão para Clínica de Psicologia
 // Autor: João Pedro Gonçalves Ferreira
 // Notação: DBML (compatível com dbdiagram.io)
 // Para visualizar: https://dbdiagram.io/d → New Diagram → Import → DBML → cole este conteúdo
+//
+// IMPORTANTE (feedback da Entrega 2):
+//   - Este arquivo é o modelo RELACIONAL (com chave primária [pk] e estrangeira [ref]),
+//     que é a ETAPA SEGUINTE à modelagem conceitual.
+//   - O modelo CONCEITUAL (sem chaves, com relacionamentos nomeados) está em
+//     MER_Conceitual.puml.
+//   - Escopo desta entrega: agendamento/atendimento/prontuário/comunicação.
+//     As tabelas financeiras (Pagamento, Recibo) foram removidas e ficam para a
+//     evolução futura (módulo financeiro).
 
 Project clinica_psicologia {
   database_type: 'PostgreSQL'
-  Note: 'Sistema de Gestão para Clínica de Psicologia — Entrega 2 (modelagem de análise)'
+  Note: 'Sistema de Gestão para Clínica de Psicologia — Entrega 2 (modelo relacional, escopo reduzido)'
 }
 
 // ============================================================
@@ -81,6 +90,14 @@ Table AgendaConfig {
   duracao_slot_min int     [not null, default: 50]
 }
 
+Table Sala {
+  id          uuid          [pk]
+  clinica_id  uuid          [ref: > Clinica.id, not null]
+  nome        varchar(100)  [not null]
+  tipo        varchar(20)   [not null, note: 'INDIVIDUAL | MULTIDISCIPLINAR']
+  capacidade  int           [not null, default: 1]
+}
+
 Table Paciente {
   id                       uuid         [pk]
   usuario_id               uuid         [ref: - Usuario.id, note: 'opcional — paciente sem login só recebe lembrete']
@@ -113,11 +130,13 @@ Table Agendamento {
   id              uuid         [pk]
   profissional_id uuid         [ref: > Profissional.id, not null]
   paciente_id     uuid         [ref: > Paciente.id, not null]
+  sala_id         uuid         [ref: > Sala.id, note: 'nulo se modalidade=ONLINE']
   inicio          timestamp    [not null]
   fim             timestamp    [not null]
   modalidade      varchar(20)  [not null, note: 'PRESENCIAL | ONLINE']
   tipo_sessao     varchar(30)  [not null, note: 'ANAMNESE | RETORNO | AVALIACAO | GRUPAL']
   status          varchar(20)  [not null, note: 'AGENDADO | CONFIRMADO | REALIZADO | CANCELADO | FALTOU']
+  recorrencia_id  uuid         [note: 'agrupa a série recorrente; nulo se avulso']
   observacoes     text
   criado_por      uuid         [ref: > Usuario.id]
   criado_em       timestamp    [not null]
@@ -125,6 +144,7 @@ Table Agendamento {
   indexes {
     (profissional_id, inicio)
     (paciente_id, inicio)
+    (sala_id, inicio)
   }
 }
 
@@ -195,27 +215,9 @@ Table TemplateMensagem {
 }
 
 // ============================================================
-// 6. Financeiro
+// 6. Financeiro — EVOLUÇÃO FUTURA (fora do escopo desta entrega)
+// As tabelas Pagamento e Recibo serão modeladas junto do módulo financeiro (EF01).
 // ============================================================
-
-Table Pagamento {
-  id              uuid          [pk]
-  atendimento_id  uuid          [ref: - Atendimento.id, unique]
-  paciente_id     uuid          [ref: > Paciente.id, not null]
-  valor           decimal(10,2) [not null]
-  forma           varchar(20)   [not null, note: 'DINHEIRO | PIX | CARTAO | PLANO']
-  status          varchar(20)   [not null, note: 'PENDENTE | PAGO | CANCELADO | INADIMPLENTE']
-  vencimento      date
-  pago_em         timestamp
-}
-
-Table Recibo {
-  id            uuid         [pk]
-  pagamento_id  uuid         [ref: - Pagamento.id, unique, not null]
-  numero        varchar(30)  [unique, not null]
-  emitido_em    timestamp    [not null]
-  pdf_uri       varchar(500)
-}
 
 // ============================================================
 // 7. LGPD e auditoria

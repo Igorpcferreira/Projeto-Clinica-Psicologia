@@ -1,6 +1,12 @@
 # Especificação de Objetivos e Requisitos (EOR)
 ## Sistema de Gestão para Clínica de Psicologia
 
+> ⚠️ **Documento histórico (Entrega 1).** Por orientação da revisão, o projeto passou a adotar
+> **um único documento de requisitos no padrão IEEE 830**:
+> [`ERS_v2_IEEE830.md`](ERS_v2_IEEE830.md). Esta EOR é mantida apenas como **referência da
+> Entrega 1** — para os requisitos vigentes, a matriz de rastreabilidade e o escopo atual
+> (com o módulo financeiro adiado), consulte a ERS v2.
+
 ---
 
 **Projeto:** Sistema de Gestão para Clínica de Psicologia

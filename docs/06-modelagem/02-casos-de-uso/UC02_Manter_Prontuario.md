@@ -31,6 +31,10 @@
 - PRE01 — Profissional autenticado com papel "Profissional" ou "Admin".
 - PRE02 — Paciente cadastrado com consentimento LGPD vigente.
 - PRE03 — Profissional possui vínculo ativo com o paciente (foi atribuído ou já registrou sessão prévia).
+- PRE04 — **Anamnese já realizada** e prontuário do paciente já aberto. A primeira entrevista
+  (coleta de histórico) é tratada no caso de uso separado **[UC_Anamnese](UC_Anamnese.md)**,
+  que cria o prontuário e vincula o paciente ao profissional. Logo, ao registrar evolução o
+  paciente **já está cadastrado e vinculado** — não há passo de "verificar/criar cadastro" aqui.
 
 ## Pós-condições
 
@@ -47,11 +51,16 @@
 1. O **Profissional** acessa o registro do atendimento concluído.
 2. O **sistema** apresenta o prontuário do paciente: anamnese, evoluções anteriores em ordem cronológica, anexos, e botão "Nova evolução".
 3. O **Profissional** seleciona "Nova evolução".
-4. O **sistema** apresenta formulário com: data/hora (preenchidas automaticamente), tipo de evolução (sessão regular, retorno, alta, encaminhamento), texto livre, anexos opcionais.
+4. O **sistema** apresenta formulário da evolução com os campos: **data/hora** (preenchidas
+   automaticamente), **tipo de evolução** (sessão regular, retorno, avaliação, alta,
+   encaminhamento), **texto da evolução** (conduta/procedimento e observações clínicas) e
+   **anexos** opcionais.
 5. O **Profissional** preenche o texto da evolução. O sistema salva rascunho automaticamente a cada 30 segundos.
 6. O **Profissional** opcionalmente anexa arquivos (até 10 MB cada, formatos PDF/imagem/áudio).
 7. O **Profissional** confirma a publicação da evolução.
-8. O **sistema** valida regras (RN01 a RN05), persiste a evolução com versionamento *append-only*, criptografa anexos e registra log de auditoria.
+8. O **sistema** valida regras (RN01 a RN07), persiste a evolução com versionamento *append-only*
+   e **vincula a evolução ao prontuário, à data e ao profissional autor** (autoria automática,
+   sem o profissional digitar), criptografa anexos e registra log de auditoria.
 9. O **sistema** confirma o registro e atualiza o prontuário visível.
 
 ## Extensões
@@ -109,12 +118,20 @@
 
 ## Requisitos especiais
 
-- RE01 — Cada operação de leitura/escrita registrada no log de auditoria (RNF-SE-06).
-- RE02 — Anexos criptografados em repouso com AES-256 (RNF-SE-02).
+> **Nota.** Os itens abaixo são, na maioria, **requisitos não funcionais transversais** do
+> sistema (segurança, auditoria, timeout, desempenho), **definidos na Especificação
+> Suplementar (ISO 25010)** e aqui apenas **referenciados** por afetarem este caso de uso —
+> não são regras exclusivas dele. O mesmo vale para o timeout de sessão e o log/rascunho
+> citados nas extensões 5a e abaixo.
+
+- RE01 — Cada operação de leitura/escrita registrada no log de auditoria (RNF-SE-06, transversal).
+- RE02 — Anexos criptografados em repouso com AES-256 (RNF-SE-02, transversal).
 - RE03 — Salvamento automático a cada 30s ou ao mudar de campo (RNF-US-06).
-- RE04 — Tempo de resposta para abrir prontuário ≤ 2s (RNF-PE-01).
+- RE04 — Tempo de resposta para abrir prontuário ≤ 2s (RNF-PE-01, transversal).
 - RE05 — *Append-only*: evoluções não podem ser editadas; correções são novas evoluções.
 - RE06 — Acesso negado registrado com severidade ALTA e alerta ao Admin se 3 ocorrências em 1h.
+- RE07 — **Timeout de sessão por inatividade** (RNF-SE-10, transversal): se a sessão expirar
+  durante a edição, o sistema preserva o rascunho local e solicita reautenticação ao retomar.
 
 ## Lista de tecnologia e variações de dados
 
@@ -135,18 +152,22 @@
 - **RN04** — Em caso de saída de profissional, prontuário pertence à clínica (não pode ser excluído pelo profissional).
 - **RN05** — Solicitação de exclusão LGPD pelo paciente resulta em **anonimização** (não exclusão física), preservando dados clínicos por obrigação regulatória do CFP.
 - **RN06** — Tempo de retenção mínima do prontuário: 20 anos após o último atendimento (Resolução CFP nº 1/2009).
+- **RN07** — **Prontuário é privado por profissional (sigilo CFP).** Em atendimento
+  multidisciplinar, os demais profissionais **não acessam o prontuário completo** do colega;
+  o que se compartilha é apenas um **resumo de acompanhamento** (status do tratamento,
+  encaminhamentos), e ainda assim mediante consentimento do paciente. *(Resolve a Q04.)*
 
 ## Questões em aberto
 
 - Q01 — A clínica deseja assinatura digital nas evoluções (ICP-Brasil)?
 - Q02 — Permitir gravação de áudio direto da interface (gravar e anexar)?
 - Q03 — Quem pode autorizar exportação completa: somente o paciente, ou Admin pode em casos legais?
-- Q04 — Compartilhamento parcial entre profissionais da mesma clínica é automático ou requer consentimento adicional?
+- ~~Q04~~ — *Resolvida em RN07: cada profissional tem prontuário próprio; compartilha-se só um resumo de acompanhamento.*
 
 ## Rastreabilidade
 
 - Atende RFs: RF15, RF16, RF17, RF18, RF26, RF27, RF28, RF29, RF30.
 - Atende necessidades: N02 (Prontuário seguro), N05 (LGPD).
-- Atende RNFs: RNF-SE-02, RNF-SE-06, RNF-SE-07, RNF-PE-01, RNF-US-06.
+- Atende RNFs: RNF-SE-02, RNF-SE-06, RNF-SE-07, RNF-SE-10, RNF-PE-01, RNF-US-06.
 - Telas relacionadas: `Tela_Prontuario_Timeline`, `Tela_Nova_Evolucao`, `Tela_Anexo`, `Tela_Exportacao_LGPD`.
 - Entidades envolvidas: Paciente, Profissional, Prontuario, EvolucaoSessao, Anexo, ConsentimentoLGPD, LogAuditoria.

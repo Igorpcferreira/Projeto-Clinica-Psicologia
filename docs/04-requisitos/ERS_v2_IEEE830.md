@@ -15,6 +15,12 @@
 |---|---|---|---|
 | 1.0 | 2026-04-04 | EOR original (Entrega 1) | Mateus |
 | 2.0 | 2026-05-07 | Reestruturação no padrão IEEE 830, refinamento de RFs e RNFs | Igor |
+| 2.1 | 2026-06-13 | Revisão da Entrega 2: redução de escopo (financeiro adiado), consolidação da matriz de rastreabilidade neste documento, correção de referências de caminho. | Equipe |
+
+> **Documento de requisitos principal.** Por orientação da revisão, o projeto adota **um único
+> documento de requisitos no padrão IEEE 830** (este). A antiga **EOR (RUP)** passa a ser
+> referência histórica da Entrega 1. A **matriz de rastreabilidade** é consolidada aqui
+> (Anexo B), evitando documento duplicado.
 
 ---
 
@@ -24,7 +30,7 @@
 Especificar de forma completa, consistente e verificável os requisitos do Sistema de Gestão para Clínica de Psicologia, servindo de base contratual entre a equipe de desenvolvimento e os stakeholders, e como insumo para os artefatos de modelagem (casos de uso, MER, protótipos).
 
 ### 1.2 Escopo
-O sistema é uma plataforma web responsiva para gestão integrada de clínicas de psicologia de pequeno porte e psicólogos autônomos. Contempla agendamento, prontuário eletrônico, financeiro, comunicação automatizada e controle de acesso.
+O sistema é uma plataforma web responsiva para gestão integrada de clínicas de psicologia de pequeno porte e psicólogos autônomos. **Nesta entrega o escopo foi reduzido** para: agendamento, atendimento, prontuário eletrônico, comunicação automatizada, relatórios operacionais e controle de acesso. O **módulo financeiro** (pagamento, recibo, dashboard e relatórios financeiros) foi **adiado para evolução futura** — os RFs correspondentes estão marcados como *Futuro* na seção 3.2.5.
 
 ### 1.3 Definições, acrônimos e abreviações
 - **RF** — Requisito Funcional
@@ -33,13 +39,13 @@ O sistema é uma plataforma web responsiva para gestão integrada de clínicas d
 - **LGPD** — Lei Geral de Proteção de Dados (Lei 13.709/2018)
 - **CFP** — Conselho Federal de Psicologia
 - **MER** — Modelo Entidade-Relacionamento
-- Demais termos: vide *Dicionário de Dados* (`joao-pedro/Dicionario_Dados.md`)
+- Demais termos: vide *Dicionário de Dados* (`docs/06-modelagem/05-mer-dicionario/Dicionario_Dados.md`)
 
 ### 1.4 Referências
 - IEEE 830-1998 — *Recommended Practice for Software Requirements Specifications*
 - ISO/IEC 25010:2011 — Modelo de qualidade
-- Documento de Visão (`amanda/Documento_Visao.md`)
-- EOR v1 (Entrega 1) — `docs/04-requisitos/`
+- Documento de Visão (`docs/06-modelagem/00-documento-visao/Documento_Visao.md`)
+- EOR v1 (Entrega 1, referência histórica) — `docs/04-requisitos/EOR-sistema-clinica-psicologia.md`
 - Estudo do sistema análogo Agenday (`docs/01-estudo-sistema-analogo/`)
 - Lei 13.709/2018 — LGPD
 - Resolução CFP nº 11/2018 — atendimento online e prontuário eletrônico
@@ -130,7 +136,7 @@ Não há requisitos específicos de hardware além de dispositivo com navegador 
 | RF11 | O sistema deve enviar lembrete automático via WhatsApp e/ou e-mail 24h e 2h antes da sessão. | Alta | Todos |
 | RF12 | O sistema deve aceitar confirmação ou cancelamento do lembrete pelo paciente. | Alta | Karla |
 | RF13 | O sistema deve permitir templates de mensagem configuráveis por clínica. | Média | Karla |
-| RF14 | O sistema deve enviar lembrete de pagamento antes do vencimento. | Média | Carol |
+| ~~RF14~~ | ~~Enviar lembrete de pagamento antes do vencimento.~~ → **Futuro (módulo financeiro)** | — | Carol |
 
 #### 3.2.4 Atendimento e Prontuário
 
@@ -141,14 +147,21 @@ Não há requisitos específicos de hardware além de dispositivo com navegador 
 | RF17 | O sistema deve permitir anexar arquivos (PDF, imagem) ao prontuário com tamanho máximo de 10 MB por arquivo. | Média | Marla |
 | RF18 | O sistema deve permitir exportar prontuário em PDF (transferência ao paciente, mediante consentimento). | Média | Karla |
 
-#### 3.2.5 Financeiro
+#### 3.2.5 Financeiro — EVOLUÇÃO FUTURA (fora do escopo desta entrega)
 
-| ID | Requisito | Prioridade | Origem |
+> Os requisitos abaixo compõem o **módulo financeiro adiado** (ver Documento de Visão §7.1).
+> Mantidos aqui para rastreabilidade, mas **não fazem parte do escopo entregue**.
+
+| ID | Requisito | Prioridade | Situação |
 |---|---|---|---|
-| RF19 | O sistema deve registrar pagamentos por sessão (dinheiro, PIX, cartão, plano). | Alta | Carol, Karla |
-| RF20 | O sistema deve emitir recibo em PDF com dados fiscais mínimos. | Alta | Karla |
-| RF21 | O sistema deve apresentar dashboard financeiro (recebíveis, inadimplência, fluxo). | Média | Karla |
-| RF22 | O sistema deve gerar relatório de comissão por profissional (configurável). | Média | Karla |
+| RF19 | Registrar pagamentos por sessão (dinheiro, PIX, cartão, plano). | — | Futuro |
+| RF20 | Emitir recibo em PDF com dados fiscais mínimos. | — | Futuro |
+| RF21 | Apresentar dashboard financeiro (recebíveis, inadimplência, fluxo). | — | Futuro |
+| RF22 | Gerar relatório de comissão por profissional (configurável). | — | Futuro |
+
+> **Dados fiscais do recibo (RF20, quando implementado):** nome e CPF do paciente, nome e
+> CRP do profissional, data e valor do atendimento, descrição do serviço — campos exigidos
+> para reembolso junto ao plano de saúde. *(Especificar campos ajuda a modelar os dados.)*
 
 #### 3.2.6 Relatórios e indicadores
 
@@ -173,11 +186,11 @@ Não há requisitos específicos de hardware além de dispositivo com navegador 
 | ID | Requisito | Prioridade | Origem |
 |---|---|---|---|
 | RF31 | O paciente deve poder visualizar suas próximas sessões. | Média | Ana Julia |
-| RF32 | O paciente deve poder baixar recibos. | Média | Ana Julia |
+| ~~RF32~~ | ~~O paciente deve poder baixar recibos.~~ → **Futuro (módulo financeiro)** | — | Ana Julia |
 | RF33 | O paciente deve poder atualizar dados de contato. | Baixa | Ana Julia |
 
 ### 3.3 Requisitos não funcionais
-Detalhados na **Especificação Suplementar (ISO/IEC 25010)** — `igor/Especificacao_Suplementar_ISO25010.md`. Resumo:
+Detalhados na **Especificação Suplementar (ISO/IEC 25010)** — `docs/06-modelagem/04-suplementar-iso25010/Especificacao_Suplementar_ISO25010.md`. Resumo:
 
 | ID | Característica ISO 25010 | Resumo |
 |---|---|---|
@@ -210,10 +223,19 @@ Atendimento aos atributos ISO 25010 (vide Suplementar).
 
 | Necessidade | RFs |
 |---|---|
-| N01 — Agenda unificada | RF06, RF07, RF08, RF10 |
+| N01 — Agenda unificada | RF06, RF07, RF08, RF09, RF10 |
 | N02 — Prontuário seguro | RF15, RF16, RF17, RF18, RF26, RF27 |
 | N03 — Lembretes automáticos | RF11, RF12, RF13 |
-| N04 — Controle financeiro | RF19, RF20, RF21, RF22 |
+| ~~N04 — Controle financeiro~~ | ~~RF19, RF20, RF21, RF22~~ → **Futuro (EF01)** |
 | N05 — LGPD | RF27, RF28, RF29, RF30 |
 | N06 — Mobile | (cobertura via RNF04) |
 | N07 — Controle de acesso | RF26 |
+
+---
+
+## Anexo B — Matriz de Rastreabilidade (vertical e horizontal)
+
+A matriz completa — **vertical** (Requisito → Caso de Uso → Classe/Método → Caso de Teste →
+**Tela**) e **horizontal** (Requisito ↔ Requisito) — está consolidada em
+[`docs/05-matriz-rastreabilidade/Matriz_Rastreabilidade.md`](../05-matriz-rastreabilidade/Matriz_Rastreabilidade.md)
+e é parte integrante desta ERS (não há documento de matriz separado/duplicado).

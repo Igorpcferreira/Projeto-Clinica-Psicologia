@@ -1,8 +1,8 @@
 # Especificação Suplementar — Requisitos Não Funcionais (ISO/IEC 25010)
 
 **Sistema:** Sistema de Gestão para Clínica de Psicologia
-**Versão:** 1.0
-**Data:** 2026-05-07
+**Versão:** 1.1
+**Data:** 2026-06-13
 **Autor:** Igor Pinto de Castro Ferreira
 **Referência:** Larman — *Utilizando UML e Padrões*, capítulo 7; ISO/IEC 25010:2011
 
@@ -12,7 +12,20 @@
 
 Este documento especifica os Requisitos Não Funcionais (RNFs) do sistema, classificados pelas **8 características de qualidade da ISO/IEC 25010:2011**: *Functional Suitability · Performance Efficiency · Compatibility · Usability · Reliability · Security · Maintainability · Portability*.
 
-Cada RNF possui: ID, característica/subcaracterística, descrição, métrica/critério de aceite e prioridade (Alta, Média, Baixa).
+Cada RNF possui: ID, característica/subcaracterística, descrição, **métrica/critério de aceite
+verificável objetivamente** e prioridade (Alta, Média, Baixa). Evitam-se critérios subjetivos
+(ex.: "interface amigável") — todo critério aqui é mensurável ou inspecionável.
+
+> **RNFs transversais e rastreabilidade com os casos de uso.** Vários requisitos especiais
+> citados nos casos de uso são, na verdade, **RNFs transversais** definidos aqui (não são
+> específicos de um único caso de uso). Exemplos: o **timeout de sessão** e a **auditoria de
+> acesso** mencionados no [UC02 Manter Prontuário](../02-casos-de-uso/UC02_Manter_Prontuario.md)
+> correspondem a **RNF-SE-10** e **RNF-SE-06**; a **criptografia do prontuário** corresponde a
+> **RNF-SE-02**; o **reenvio de lembrete** do [UC04](../02-casos-de-uso/UC04_Enviar_Lembrete.md)
+> corresponde a **RNF-RE-05**. Os casos de uso apenas **referenciam** estes RNFs.
+>
+> **Escopo desta entrega:** RNFs ligados exclusivamente ao módulo financeiro (ex.: emissão de
+> recibo) ficam para a evolução futura.
 
 ---
 
@@ -52,7 +65,7 @@ Cada RNF possui: ID, característica/subcaracterística, descrição, métrica/c
 | RNF-CO-02 | Interface responsiva entre 320px e 1920px de largura. | Validação visual em breakpoints (320, 360, 768, 1024, 1440, 1920). | Alta |
 | RNF-CO-03 | Integração com WhatsApp Business API (Meta direta, Twilio ou Z-API) sem alteração de código de domínio (apenas adaptador). | Switch de provedor por configuração. | Média |
 | RNF-CO-04 | Integração com servidor SMTP por configuração. | Switch de provedor sem alteração de código. | Média |
-| RNF-CO-05 | Exportação de prontuário e recibo em PDF/A para arquivamento de longo prazo. | Validação de PDF/A-3. | Baixa |
+| RNF-CO-05 | Exportação de prontuário e relatórios em PDF/A para arquivamento de longo prazo. | Validação de PDF/A-3. | Baixa |
 
 ---
 

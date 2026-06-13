@@ -8,6 +8,30 @@
 
 ---
 
+## Rastreabilidade Tela ↔ Caso de Uso
+
+Cada tela liga-se a um ou mais casos de uso (pode ser 1:N). Verificação: toda tela ativa tem
+caso de uso e todo caso de uso tem tela.
+
+| Tela | Caso(s) de uso | Observação |
+|------|----------------|------------|
+| M01_login | UC_Autenticar (RF03/RF04) | — |
+| M02_home_portal | UC_Portal_Paciente (RF31), UC04 confirmação (RF12), UC_Cancelar_Remarcar (RF08) | — |
+| M03_marcar_consulta | UC01 Agendar Consulta (RF06–RF10) | autoagendamento |
+| ~~M04_recibos~~ | ~~UC_Portal (recibos)~~ | **Futuro — módulo financeiro (RF32)** |
+| M05_meus_dados | UC_Portal_Paciente (RF33) | — |
+| M06_privacidade | UC_Consentimento_LGPD (RF28), UC_Portabilidade (RF29), UC_Solicitar_Anonimizacao (RF30), UC_Exportar_Prontuario (RF18) | — |
+| M07_agenda_diaria | UC01 (visão profissional) | — |
+| M08_iniciar_sessao | UC03 Registrar Atendimento (RF15) | — |
+| M09_anotacao_rapida | UC02 Manter Prontuário (RF16) | — |
+| M10_encerrar_sessao | UC03 Registrar Atendimento (RF15) | a parte de pagamento da tela vira *futuro* |
+
+> **Telas de caso de uso ainda sem protótipo mobile** (a criar / versão desktop): cadastros
+> (RF01, RF02, RF05), templates (RF13), relatórios (RF23–RF25), anamnese (RF16) e auditoria
+> (RF27). Listadas na [Matriz de Rastreabilidade](../../05-matriz-rastreabilidade/Matriz_Rastreabilidade.md).
+
+---
+
 ## Tela M01 — Login Paciente (mobile)
 
 ```

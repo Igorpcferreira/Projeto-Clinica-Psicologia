@@ -13,9 +13,15 @@
 | **Nome** | Enviar Lembrete (WhatsApp/E-mail) |
 | **Escopo** | Sistema de Gestão para Clínica de Psicologia |
 | **Nível** | Caso de uso de subfunção (disparado por scheduler do sistema) |
-| **Ator Principal** | Sistema (scheduler de lembretes) |
+| **Ator Principal** | Sistema (agendador/scheduler **interno** de lembretes) |
 | **Atores Secundários** | Provedor de WhatsApp Business API, Provedor de e-mail SMTP, Paciente (recebedor passivo / pode confirmar) |
 | **Frequência** | Muito alta — proporcional ao volume de agendamentos |
+
+> **Sobre o "agendador".** O *scheduler* é uma **rotina interna do próprio sistema** (não é um
+> software externo): uma **classe ativa** que se aciona sozinha por tempo (ex.: a cada 1 min /
+> toda manhã às 7h), varre os agendamentos do período e dispara os lembretes. É uma aplicação
+> do padrão **Observer** — o agendador observa o relógio/eventos da agenda e reage quando a
+> condição esperada ocorre, sem depender de uma chamada de outro objeto.
 
 ## Stakeholders e Interesses
 

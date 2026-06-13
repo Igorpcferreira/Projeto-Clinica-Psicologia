@@ -1,9 +1,15 @@
-# Value Proposition Canvas — Persona: Marla Gonçalves
+# Value Proposition Canvas — Papel: Psicólogo Autônomo (persona Marla Gonçalves)
 
-**Persona:** Marla Gonçalves — psicóloga autônoma
+**Papel representado:** **Psicólogo autônomo** — Marla Gonçalves é a persona concreta
+usada para ilustrar o papel; o canvas vale para o **perfil**, não só para ela.
 **Autor:** Pedro Lourençoni Lima
 **Referência:** *Testing Business Ideas* (Strategyzer), pgs. 38-39
 **Insumos:** entrevista da Entrega 1 conduzida por Pedro (`docs/02-entrevistas/Entrevista-Marla.docx.pdf`)
+
+> **Escopo da Entrega 2.** O VPC mantém a visão completa do valor para o papel, mas os
+> itens ligados ao **financeiro** (cobrança PIX, recibo, resumo financeiro, carnê-leão)
+> estão marcados com **(futuro)** porque o módulo financeiro foi adiado nesta entrega
+> (ver Documento de Visão §7.1).
 
 ---
 
@@ -28,10 +34,12 @@
 #### Funcionais
 - CJ01 — Marcar e remarcar sessões com pacientes (com flexibilidade de horário).
 - CJ02 — Manter prontuário individual de cada paciente, acessível em mobile entre consultas.
-- CJ03 — Cobrar pacientes (PIX, transferência, dinheiro).
-- CJ04 — Emitir recibo para o paciente que pede ao convênio.
+- CJ03 — Cobrar pacientes (PIX, transferência, dinheiro). *(futuro)*
+- CJ04 — Emitir recibo para o paciente que pede ao convênio. *(futuro)*
 - CJ05 — Lembrar a si mesma e ao paciente das sessões — reduzir esquecimentos.
-- CJ06 — Declarar imposto de renda (carnê-leão) com algum nível de organização contábil.
+- CJ06 — Declarar imposto de renda (carnê-leão) com organização contábil. *(futuro)*
+- CJ11 — **Deixar o próprio paciente marcar/remarcar horário** (autoagendamento), para
+  ela parar de ser o "balcão" e reduzir a troca de mensagens.
 
 #### Sociais
 - CJ07 — Manter imagem profissional (atendimento pontual, recibo correto, comunicação polida).
@@ -55,6 +63,7 @@
 | P08 | Mudar de ferramenta exige migrar manualmente todos os pacientes (alto custo de switching) | Média |
 | P09 | Atender entre salas (mobilidade) — não funciona bem em desktop, exige solução mobile | Alta |
 | P10 | Risco LGPD ela não sabe se está em conformidade ao usar Google Drive para arquivos clínicos | Alta |
+| P11 | Fica o dia todo respondendo WhatsApp para marcar/remarcar horário — vira "secretária de si mesma" | Alta |
 
 ### Gains
 
@@ -84,28 +93,31 @@
 ### Products & Services
 
 - PS01 — App web responsivo mobile-first com PWA instalável.
-- PS02 — Agenda + prontuário + financeiro integrados em uma conta única (sem add-ons).
-- PS03 — Cobrança via PIX dinâmico (QR code) com baixa automática quando confirmado.
+- PS02 — Agenda + prontuário integrados em uma conta única (sem add-ons).
+- PS03 — Cobrança via PIX dinâmico (QR code) com baixa automática quando confirmado. *(futuro)*
 - PS04 — Engine de lembretes via WhatsApp Business (não pessoal) e e-mail.
 - PS05 — Importação de pacientes via CSV no onboarding.
 - PS06 — Conformidade LGPD pronta (consentimento embutido, criptografia, export).
-- PS07 — Resumo financeiro mensal automático em uma tela.
+- PS07 — Resumo financeiro mensal automático em uma tela. *(futuro)*
 - PS08 — Plano "Autônomo" com preço acessível (a definir; foco em diferenciação contra Agenday).
+- PS09 — **Portal de autoagendamento do paciente:** o paciente vê os horários livres da
+  Marla e marca/remarca sozinho, dentro das regras que ela definir.
 
 ### Pain Relievers
 
 | Atende dor | Como o produto alivia |
 |---|---|
 | P01 (no-show) | PS04 envia lembretes 24h e 2h antes via WhatsApp, com confirmação 1 clique |
-| P02 (recibo esquecido) | PS03 emite recibo automático ao registrar pagamento |
+| P02 (recibo esquecido) | PS03 emite recibo automático ao registrar pagamento *(futuro)* |
 | P03 (prontuário disperso) | PS02 com prontuário criptografado, *append-only* |
 | P04 (WhatsApp pessoal) | PS04 usa WhatsApp Business — separação total da conta pessoal |
-| P05 (cobrança manual) | PS03 com PIX dinâmico e baixa automática por webhook do banco |
-| P06 (sem visão financeira) | PS07 — uma tela com fatura do mês |
+| P05 (cobrança manual) | PS03 com PIX dinâmico e baixa automática por webhook do banco *(futuro)* |
+| P06 (sem visão financeira) | PS07 — uma tela com fatura do mês *(futuro)* |
 | P07 (preço alto) | PS08 — plano específico para autônomo (escopo enxuto) |
 | P08 (migração) | PS05 — importação CSV em <5 min |
 | P09 (mobilidade) | PS01 — mobile-first com PWA offline |
 | P10 (LGPD) | PS06 — pronto pra conformidade |
+| P11 (vira secretária de si mesma) | PS09 — autoagendamento: o paciente marca sozinho nos horários livres |
 
 ### Gain Creators
 
@@ -114,14 +126,33 @@
 | G01 (confidencialidade) | Criptografia em repouso + RBAC (Marla é única dona dos dados) |
 | G02 (acesso de qualquer lugar) | PS01 — qualquer browser, qualquer device |
 | G03 (lembretes) | PS04 |
-| G04 (cobrança) | PS03 |
+| G04 (cobrança) | PS03 *(futuro)* |
 | G05 (backup) | Backup automático diário |
-| G06 (visão financeira) | PS07 |
+| G06 (visão financeira) | PS07 *(futuro)* |
 | G07 (LGPD) | PS06 + página exportável "como tratamos seus dados" |
 | G08 (importação) | PS05 |
-| G09 (carnê-leão) | Relatório anual exportável (CSV/PDF) com receita e descrição padrão |
+| G09 (carnê-leão) | Relatório anual exportável (CSV/PDF) com receita e descrição padrão *(futuro)* |
 | G10 (offline) | PWA com cache local e sync ao reconectar |
 | G11 (templates) | Templates pré-prontos por tipo de comunicação |
+| Autonomia da agenda (CJ11) | PS09 — paciente marca/remarca sozinho dentro das regras da Marla |
+
+---
+
+## Resumo do encaixe: Tarefa → Dor → Ganho → Produto
+
+Visão linha-a-linha (uma "história" de valor por tarefa), como recomendado na revisão —
+cada tarefa cruza com uma dor, um ganho esperado e o produto/serviço que entrega:
+
+| Tarefa (Job) | Dor associada | Ganho esperado | Produto/Serviço |
+|---|---|---|---|
+| CJ01 Marcar/remarcar | P01 no-show | G03 lembretes | PS04 lembretes |
+| CJ11 Deixar paciente marcar | P11 vira secretária de si mesma | Autonomia da agenda | PS09 autoagendamento |
+| CJ02 Manter prontuário | P03 prontuário disperso | G01 confidencialidade | PS02 prontuário criptografado |
+| CJ05 Lembrar das sessões | P01 no-show | G03 lembretes | PS04 lembretes |
+| CJ07/CJ08 Imagem profissional / separar WhatsApp | P04 WhatsApp pessoal | G07 LGPD/imagem | PS04 WhatsApp Business + PS06 |
+| (mobilidade entre salas) | P09 mobilidade | G02 acesso de qualquer lugar | PS01 mobile-first |
+| CJ03/CJ04 Cobrar/emitir recibo *(futuro)* | P02/P05 | G04 cobrança | PS03 *(futuro)* |
+| CJ06 Carnê-leão *(futuro)* | P06 sem visão financeira | G06/G09 | PS07/relatório anual *(futuro)* |
 
 ---
 

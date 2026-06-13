@@ -1,6 +1,9 @@
 @startuml MER_Clinica_Psicologia
-' Modelo Entidade-Relacionamento — Sistema de Gestão para Clínica de Psicologia
+' Modelo RELACIONAL (lógico) — Sistema de Gestão para Clínica de Psicologia
 ' Autor: João Pedro Gonçalves Ferreira
+' Nota: este é o modelo RELACIONAL (com PK/FK). O modelo CONCEITUAL (sem chaves,
+'       relacionamentos nomeados) está em MER_Conceitual.puml.
+'       Escopo reduzido: tabelas financeiras (Pagamento/Recibo) = evolução futura.
 ' Para gerar PNG: java -jar plantuml.jar MER.puml
 ' Online: http://www.plantuml.com/plantuml/uml/
 
@@ -72,6 +75,15 @@ entity AgendaConfig {
   * duracao_slot_min : int
 }
 
+entity Sala {
+  * <b>id</b> : uuid
+  --
+  * clinica_id : uuid <<FK>>
+  * nome : varchar
+  * tipo : varchar [INDIVIDUAL|MULTIDISCIPLINAR]
+  * capacidade : int
+}
+
 entity Paciente {
   * <b>id</b> : uuid
   --
@@ -96,11 +108,13 @@ entity Agendamento {
   --
   * profissional_id : uuid <<FK>>
   * paciente_id : uuid <<FK>>
+  sala_id : uuid <<FK>>
   * inicio : timestamp
   * fim : timestamp
   * modalidade : varchar
   * tipo_sessao : varchar
   * status : varchar
+  recorrencia_id : uuid
 }
 
 entity Atendimento {
@@ -164,24 +178,8 @@ entity TemplateMensagem {
   * conteudo : text
 }
 
-' ============== Financeiro ==============
-entity Pagamento {
-  * <b>id</b> : uuid
-  --
-  atendimento_id : uuid <<FK>> [unique]
-  * paciente_id : uuid <<FK>>
-  * valor : decimal
-  * forma : varchar
-  * status : varchar
-}
-
-entity Recibo {
-  * <b>id</b> : uuid
-  --
-  * pagamento_id : uuid <<FK>> [unique]
-  * numero : varchar
-  * emitido_em : timestamp
-}
+' ============== Financeiro — EVOLUÇÃO FUTURA (fora do escopo desta entrega) ==============
+' Pagamento e Recibo serão modelados junto do módulo financeiro (EF01).
 
 ' ============== LGPD e auditoria ==============
 entity ConsentimentoLGPD {
@@ -209,6 +207,7 @@ Papel ||--o{ UsuarioPapel
 Usuario ||--o| Profissional
 Usuario ||--o| Paciente
 Clinica ||--o{ Profissional
+Clinica ||--o{ Sala
 Profissional ||--o{ ProfissionalEspecialidade
 Especialidade ||--o{ ProfissionalEspecialidade
 Profissional ||--o{ AgendaConfig
@@ -216,6 +215,7 @@ Profissional ||--o{ VinculoProfissionalPaciente
 Paciente ||--o{ VinculoProfissionalPaciente
 Profissional ||--o{ Agendamento
 Paciente ||--o{ Agendamento
+Sala ||--o{ Agendamento
 Agendamento ||--o| Atendimento
 Paciente ||--|| Prontuario
 Prontuario ||--o{ EvolucaoSessao
@@ -225,9 +225,6 @@ EvolucaoSessao ||--o{ Anexo
 EvolucaoSessao ||--o{ EvolucaoSessao : corrige
 Agendamento ||--o{ Lembrete
 Clinica ||--o{ TemplateMensagem
-Atendimento ||--o| Pagamento
-Paciente ||--o{ Pagamento
-Pagamento ||--|| Recibo
 Paciente ||--o{ ConsentimentoLGPD
 Usuario ||--o{ LogAuditoria
 
