@@ -1,0 +1,56 @@
+@startuml C2_Diagrama_Pacotes
+' Nível C2 — Diagrama de Pacotes (organização lógica em camadas)
+' Autor: Igor Pinto de Castro Ferreira
+skinparam monochrome true
+skinparam shadowing false
+skinparam packageStyle rectangle
+
+package "Apresentação" {
+  [Web SPA\n(mobile-first)] as UI
+}
+
+package "API (REST)" {
+  [Controllers REST] as Controllers
+}
+
+package "Domínio" {
+  package "Identidade e Acesso" as PIdent
+  package "Agendamento" as PAgenda
+  package "Atendimento e Prontuário" as PProntuario
+  package "Comunicação" as PComunic
+  package "Relatórios" as PRelat
+}
+
+package "Infraestrutura" {
+  package "Persistência (ORM)" as PPersist
+  package "Integração Externa" as PInteg
+  package "Auditoria e LGPD" as PAudit
+}
+
+UI --> Controllers : HTTPS/JSON
+Controllers --> PIdent
+Controllers --> PAgenda
+Controllers --> PProntuario
+Controllers --> PComunic
+Controllers --> PRelat
+
+PAgenda --> PComunic : programa lembrete
+PProntuario --> PAgenda : usa atendimento
+PRelat --> PAgenda : lê dados de agenda
+
+PIdent --> PPersist
+PAgenda --> PPersist
+PProntuario --> PPersist
+PRelat --> PPersist
+PComunic --> PInteg : WhatsApp/SMTP
+PProntuario --> PInteg : object storage (anexos)
+
+PIdent ..> PAudit
+PAgenda ..> PAudit
+PProntuario ..> PAudit
+
+note bottom of PAudit
+  Auditoria e LGPD são transversais:
+  todo pacote de domínio registra eventos.
+end note
+@enduml
