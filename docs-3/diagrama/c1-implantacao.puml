@@ -1,0 +1,45 @@
+@startuml C1_Diagrama_Implantacao
+' Nível C1 — Diagrama de Implantação (contexto externo do sistema)
+' Sistema de Gestão para Clínica de Psicologia
+' Autora: Amanda Barbosa Ferreira Agapito
+' Para gerar PNG: java -jar plantuml.jar c1-implantacao.puml
+
+skinparam monochrome true
+skinparam shadowing false
+skinparam linetype ortho
+left to right direction
+
+node "Dispositivo do Usuário\n(notebook / celular)" as Cliente {
+  artifact "Navegador Web\n(SPA responsiva, PWA)" as SPA
+}
+
+node "Provedor de Nuvem (data center BR)" as Cloud {
+  node "Servidor de Aplicação\n(container Docker)" as App {
+    artifact "API REST\n(backend stateless)" as API
+    artifact "Agendador de Lembretes\n(rotina interna)" as Sched
+  }
+  node "Servidor de Banco de Dados" as DBNode {
+    database "PostgreSQL" as DB
+  }
+  node "Object Storage" as Storage {
+    artifact "Anexos do prontuário\n(criptografados AES-256)" as Anexos
+  }
+}
+
+cloud "WhatsApp Business API\n(Meta / Twilio / Z-API)" as WhatsApp
+cloud "Servidor SMTP\n(SendGrid / Mailgun)" as SMTP
+
+SPA --> API : HTTPS / TLS 1.2+\n(REST + JSON)
+API --> DB : TCP 5432 / TLS\n(SQL)
+API --> Anexos : leitura/escrita\ncifrada
+Sched --> WhatsApp : HTTPS\n(envio de lembrete)
+Sched --> SMTP : SMTP/TLS\n(envio de e-mail)
+API --> WhatsApp : HTTPS\n(webhook de resposta)
+
+note bottom of Cloud
+  Hospedagem em data center no Brasil para
+  alinhamento à LGPD. Backend stateless permite
+  escalar horizontalmente (mais réplicas do App).
+end note
+
+@enduml
